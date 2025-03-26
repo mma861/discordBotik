@@ -58,17 +58,29 @@ func messageReact(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
-	pregnant, err := readFile("pregnant.txt")
+	pregFile := "pregnant.txt"
+	swearFile := "swears.txt"
+	pregnantReact, err := readFile(pregFile)
+	if err != nil {
+		fmt.Println("Нет файла:", err)
+	}
+	deleteMsg, err := readFile(swearFile)
 	if err != nil {
 		fmt.Println("Нет файла:", err)
 	}
 	content := strings.ToLower(m.Content)
 	// fmt.Println(strings.Contains(content, ifInStr(content, pregnant)))
 	// fmt.Println(ifInStr(content, pregnant))
-	if strings.Contains(content, ifInStr(content, pregnant)) {
+	if strings.Contains(content, ifInStr(content, pregnantReact)) {
 		err := s.MessageReactionAdd(m.ChannelID, m.ID, "🫃")
 		if err != nil {
 			fmt.Println("Нет реакции:", err, "🫃")
+		}
+	}
+	if strings.Contains(content, ifInStr(content, deleteMsg)) {
+		err := s.ChannelMessageDelete(m.ChannelID, m.ID)
+		if err != nil {
+			fmt.Println("Нет удаления:", err, m.ChannelID, m.ID)
 		}
 	}
 }
