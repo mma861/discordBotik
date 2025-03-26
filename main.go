@@ -42,7 +42,7 @@ func main() {
 	}
 
 	dg.AddHandler(messageReact)
-	dg.AddHandler(messageReply)
+
 	err = dg.Open()
 	if err != nil {
 		fmt.Println("Нет соединения:", err)
@@ -60,6 +60,8 @@ func messageReact(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 	pregFile := "pregnant.txt"
 	swearFile := "swears.txt"
+	govnoFile := "govno.txt"
+
 	pregnantReact, err := readFile(pregFile)
 	if err != nil {
 		fmt.Println("Нет файла:", err)
@@ -68,27 +70,37 @@ func messageReact(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if err != nil {
 		fmt.Println("Нет файла:", err)
 	}
+	govnoMsg, err := readFile(govnoFile)
+	if err != nil {
+		fmt.Println("Нет файла:", err)
+	}
+
 	content := strings.ToLower(m.Content)
 	// fmt.Println(strings.Contains(content, ifInStr(content, pregnant)))
 	// fmt.Println(ifInStr(content, pregnant))
-	if strings.Contains(content, ifInStr(content, pregnantReact)) {
+	if strings.Contains(content, ifInStr(content, pregnantReact)) || strings.Contains(content, ifInStr(content, govnoMsg)) {
 		err := s.MessageReactionAdd(m.ChannelID, m.ID, "🫃")
 		if err != nil {
 			fmt.Println("Нет реакции:", err, "🫃")
 		}
 	}
+
 	if strings.Contains(content, ifInStr(content, deleteMsg)) {
 		err := s.ChannelMessageDelete(m.ChannelID, m.ID)
 		if err != nil {
 			fmt.Println("Нет удаления:", err, m.ChannelID, m.ID)
 		}
 	}
-}
-func messageReply(s *discordgo.Session, m *discordgo.MessageCreate) {
+
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
-	if strings.Contains(m.Content, "🫃") {
+
+	if strings.Contains(content, "🫃") {
 		s.ChannelMessageSendReply(m.ChannelID, "🫃", m.Reference())
+	}
+
+	if strings.Contains(content, ifInStr(content, govnoMsg)) {
+		s.ChannelMessageSendReply(m.ChannelID, ifInStr(content, govnoMsg)+" говно", m.Reference())
 	}
 }
